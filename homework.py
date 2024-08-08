@@ -49,7 +49,8 @@ def get_api_answer(timestamp):
     """Делает запрос к единственному эндпоинту API-сервиса."""
     payload = {'from_date': timestamp}
     try:
-        homework_statuses = requests.get(ENDPOINT, headers=HEADERS, params=payload)
+        homework_statuses = requests.get(ENDPOINT, headers=HEADERS,
+                                         params=payload)
         if homework_statuses.status_code == HTTPStatus.OK:
             return homework_statuses.json()
         else:
