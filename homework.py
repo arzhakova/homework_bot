@@ -59,10 +59,11 @@ def get_api_answer(timestamp):
                                          params=payload)
     except RequestException as error:
         raise ConnectionError(f'Ошибка при запросе к API сервиса Практикум '
-                              f'Домашка с параметром {payload}: {error}')
+                              f'Домашка {ENDPOINT}, с параметром {payload}:'
+                              f' {error}')
     if homework_statuses.status_code != HTTPStatus.OK:
         raise HTTPError(f'Код ответа API сервиса Практикум Домашка '
-                        f'с параметром {payload}: '
+                        f'{ENDPOINT}, с параметром {payload}: '
                         f'{homework_statuses.status_code}')
     logger.debug('Получение ответа API сервиса Практикум Домашка '
                  'прошло успешно')
@@ -125,14 +126,15 @@ def main():
             if homework_message != bot_message:
                 send_message(bot, homework_message)
                 bot_message = homework_message
-                timestamp = response.get('current_date') or int(time.time())
-        except apihelper.ApiException as error:
+                timestamp = response.get('current_date', timestamp)
+        except (apihelper.ApiException, requests.RequestException) as error:
             logger.exception(f'Ошибка телеграмма: {error}')
         except Exception as error:
             error_message = f'Сбой в работе программы: {error}'
             logger.exception(error_message)
             if error_message != bot_message:
-                with suppress(apihelper.ApiException):
+                with suppress(apihelper.ApiException,
+                              requests.RequestException):
                     send_message(bot, error_message)
                     bot_message = error_message
         finally:
